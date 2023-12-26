@@ -20,46 +20,60 @@ import net.javaguides.springboot.repository.UserRepository;
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-
+	
 	@Autowired
 	private UserRepository userRepository;
-
-	// get all users
+	
+	//get all users
 	@GetMapping
-	public List<User> getAllUsers() {
+	public List<User> getAllUsers()
+	{
+		System.out.println("in getAllUsers");
 		return this.userRepository.findAll();
 	}
-
-	// get user by id
+	
+	//get user by id
 	@GetMapping("/{id}")
-	public User getUserById(@PathVariable (value = "id") long userId) {
+	public User getUserById(@PathVariable(value = "id") long userId)
+	{
+		System.out.println("in getUserById userId -> "+userId);
 		return this.userRepository.findById(userId)
-				.orElseThrow(() -> new ResourceNotFoundException("User not found with id :" + userId));
+				.orElseThrow(() -> new ResourceNotFoundException("User not found with id -> "+userId));
 	}
-
-	// create user
+	
+	//create user
 	@PostMapping
-	public User createUser(@RequestBody User user) {
+	public User createUser(@RequestBody User user)
+	{
+		System.out.println("in createUser user -> "+user);
 		return this.userRepository.save(user);
 	}
 	
-	// update user
+	//update user by id
 	@PutMapping("/{id}")
-	public User updateUser(@RequestBody User user, @PathVariable ("id") long userId) {
-		 User existingUser = this.userRepository.findById(userId)
-			.orElseThrow(() -> new ResourceNotFoundException("User not found with id :" + userId));
-		 existingUser.setFirstName(user.getFirstName());
-		 existingUser.setLastName(user.getLastName());
-		 existingUser.setEmail(user.getEmail());
-		 return this.userRepository.save(existingUser);
+	public User updateUser(@RequestBody User user,@PathVariable(value = "id") long userId)
+	{
+		System.out.println("in updateUser user -> "+user+",userId -> "+userId);
+		return userRepository.findById(userId)
+	      .map(userExisting -> {
+	    	  userExisting.setFirstName(user.getFirstName());
+	    	  userExisting.setLastName(user.getLastName());
+	    	  userExisting.setEmail(user.getEmail());
+	    	  return userRepository.save(userExisting);
+	      })
+	      .orElseThrow(() -> new ResourceNotFoundException("User not found with id -> "+userId));
 	}
 	
-	// delete user by id
+	//delete user by id
 	@DeleteMapping("/{id}")
-	public ResponseEntity<User> deleteUser(@PathVariable ("id") long userId){
-		 User existingUser = this.userRepository.findById(userId)
-					.orElseThrow(() -> new ResourceNotFoundException("User not found with id :" + userId));
-		 this.userRepository.delete(existingUser);
-		 return ResponseEntity.ok().build();
+	public ResponseEntity<User> deleteUser(@PathVariable(value = "id") long userId)
+	{
+		System.out.println("in deleteUser userId -> "+userId);
+		
+		User existingUser = this.userRepository.findById(userId)
+				.orElseThrow(() -> new ResourceNotFoundException("User not found with id -> "+userId));
+		//userRepository.deleteById(userId);
+		this.userRepository.delete(existingUser);
+		return ResponseEntity.ok().build();
 	}
 }
